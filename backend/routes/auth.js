@@ -8,6 +8,18 @@ const router = Router();
 router.post("/login", async (req, res) => {
   const { username, password } = req.body;
 
+  // 1. ลอง Console log ดูใน Render Logs
+  console.log("Login Attempt:", { username, password });
+  console.log("ENV Expected:", { 
+    u: process.env.ADMIN_USERNAME, 
+    p: process.env.ADMIN_PASSWORD 
+  });
+
+  // 2. ตรวจสอบว่าค่า Env มีตัวตนไหม
+  if (!process.env.ADMIN_USERNAME || !process.env.ADMIN_PASSWORD) {
+     return res.status(500).json({ error: "Server missing Env variables" });
+  }
+
   if (
     username === process.env.ADMIN_USERNAME &&
     password === process.env.ADMIN_PASSWORD
