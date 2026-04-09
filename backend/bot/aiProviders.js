@@ -93,6 +93,7 @@ const providers = {
   openai: callOpenAI,
   anthropic: callAnthropic,
   gemini: callGemini,
+  custom: callOpenAI,
 };
 
 // ─── Main Export ───
