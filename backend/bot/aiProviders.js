@@ -55,6 +55,10 @@ async function callCustom(messages, config) {
   const client = new OpenAI({ 
     apiKey: config.api_key,
     baseURL: finalBaseUrl // บังคับใช้ตัวแปรที่เราประกาศไว้ด้านบน
+    defaultHeaders: {
+      "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36",
+      "Accept": "application/json",
+    }
   });
 
   const response = await client.chat.completions.create({
