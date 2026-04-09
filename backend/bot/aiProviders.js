@@ -46,21 +46,22 @@ async function callOpenAI(messages, config) {
 }
 
 async function callCustom(messages, config) {
-  // บังคับว่าต้องมี base_url ไม่งั้นไม่ทำงาน
-  if (!config.base_url) {
-    throw new Error("ค่าย Custom จำเป็นต้องระบุ Base URL ใน Dashboard");
-  }
+  // 1. ตรวจสอบก่อนว่ามีค่า base_url มาจริงไหม
+  const finalBaseUrl = config.base_url || "https://api.devdove.site/v1"; 
+  // ^^^ ใส่ URL ของ Proxy คุณลงไปตรงๆ เป็นค่า Default แทนของ OpenAI
+
+  console.log("🚀 กำลังส่งไปที่ URL:", finalBaseUrl);
 
   const client = new OpenAI({ 
     apiKey: config.api_key,
-    baseURL: config.base_url // ใช้ค่าจาก DB โดยตรง
+    baseURL: finalBaseUrl // บังคับใช้ตัวแปรที่เราประกาศไว้ด้านบน
   });
 
   const response = await client.chat.completions.create({
     model: config.model || "gpt-4o-mini",
-    messages,
-    max_tokens: 2048,
+    messages: messages,
   });
+
   return response.choices[0].message.content;
 }
 
