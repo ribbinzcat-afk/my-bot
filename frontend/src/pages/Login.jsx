@@ -10,7 +10,7 @@ export default function Login({ onLogin }) {
     e.preventDefault();
     setError("");
     try {
-      const { data } = await API.post("/api/auth/login", { username, password });
+      const { data } = await API.post("/auth/login", { username, password });
       onLogin(data.token);
     } catch {
       setError("ชื่อผู้ใช้หรือรหัสผ่านไม่ถูกต้อง");
