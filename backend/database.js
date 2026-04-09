@@ -1,11 +1,30 @@
 import Database from "better-sqlite3";
 import { fileURLToPath } from "url";
 import { dirname, join } from "path";
+import fs from "fs";
 
-const __dirname = dirname(fileURLToPath(import.meta.url));
-const db = new Database(join(__dirname, "bot.db"));
+const __dirname = fileURLTfileURLToPathToPath(import.meta.uconst
 
-db.pragma("journal_mode = WAL");
+// --- ปรับปรุงส่วนการเลือก Path ของ Database ---
+let dbPath;
+
+if (process.env.RENDER) {
+  // เมื่อรันบน Render ให้ใช้ Disk ก้อนนอกที่ Mount ไว้ที่ /data
+  dbPath = "/data/bot.db";
+  
+  // ตรวจสอบเผื่อโฟลเดอร์ /data ยังไม่ถูกสร้าง (Render มักจะจัดการให้แต่เช็คไว้ชัวร์กว่า)
+  if (!fs.existsSync("/data")) {
+    fs.mkdirSync("/data", { recursive: true });
+  }
+} else {
+  // เมื่อรันในเครื่องตัวเอง (Local) ให้เก็บไว้ในโฟลเดอร์เดิม (backend/bot.db)
+  dbPath = join(__dirname, "bot.db");
+}
+
+const db = new Database(dbPath);
+// ------------------------------------------
+
+ragmapragma("journal_mode = WAL");
 
 export function initDatabase() {
   db.exec(`
