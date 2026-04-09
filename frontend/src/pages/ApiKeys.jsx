@@ -139,7 +139,7 @@ export default function ApiKeys() {
       const model = form.model || selectedProvider?.defaultModel || "gpt-4o-mini";
       const base_url = form.base_url || selectedProvider?.defaultUrl || "";
 
-      const { data } = await API.post("/settings/api-keys/test", {
+      const { data } = await API.post("/settings/api-keys", {
         provider: form.provider,
         api_key: form.api_key,
         model,
