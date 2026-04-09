@@ -114,8 +114,8 @@ async function callGemini(messages, config) {
 
   const chat = model.startChat({
     history,
-systemInstruction: systemText 
-      ? { parts: [{ text: systemText }] } 
+systemInstruction: systemMsg 
+      ? { parts: [{ text: systemMsg }] } 
       : undefined,
   });
 
