@@ -114,7 +114,9 @@ async function callGemini(messages, config) {
 
   const chat = model.startChat({
     history,
-    systemInstruction: systemMsg || undefined,
+systemInstruction: systemText 
+      ? { parts: [{ text: systemText }] } 
+      : undefined,
   });
 
   const lastMsg = chatMessages[chatMessages.length - 1];
