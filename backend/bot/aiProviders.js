@@ -179,3 +179,43 @@ export function clearHistory(channelId) {
     channelId
   );
 }
+
+// ─── AI Embed Generator ───
+export async function getAIEmbedResponse(userInput) {
+  // ดึง Provider ที่ตั้งค่าไว้มาใช้ (แนะนำให้ใช้ Gemini หรือ OpenAI)
+  const activeProvider = getSetting("active_provider") || "openai";
+  const config = getApiKey(activeProvider);
+
+  if (!config) throw new Error("ไม่พบ API Key ค่ะ");
+
+  const providerFn = providers[activeProvider];
+
+  // คำสั่งพิเศษบังคับ AI ให้ตอบเป็น JSON เท่านั้น
+  const systemInstruction = `You are a Discord Embed designer. 
+Respond ONLY with a JSON object. No prose, no markdown code blocks.
+Structure:
+{
+  "title": "string",
+  "description": "string",
+  "color": "hex_code",
+  "footer": "string"
+}`;
+
+  const messages = [
+    { role: "system", content: systemInstruction },
+    { role: "user", content: `Create a professional Discord embed about: ${userInput}` }
+  ];
+
+  try {
+    let reply = await providerFn(messages, config);
+    
+    // ลบพวก ```json ... ``` ที่ AI ชอบแถมมาออกถ้ามี
+    reply = reply.replace(/```json|```/g, "").trim();
+    
+    return JSON.parse(reply); // ส่ง Object กลับไปให้ไฟล์หลัก
+  } catch (err) {
+    console.error("Embed AI Error:", err);
+    throw new Error("AI ตอบกลับมาไม่ใช่รูปแบบ JSON ที่ถูกต้องค่ะ");
+  }
+}
+
