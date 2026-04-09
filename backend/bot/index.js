@@ -8,7 +8,7 @@ import {
   REST,
   Routes,
 } from "discord.js";
-import { getAIResponse, clearHistory } from "./aiProviders.js";
+import { getAIResponse, clearHistory, getAIEmbedResponse } from "./aiProviders.js";
 import { initScheduler, reloadSchedules } from "./scheduler.js";
 import db from "../database.js";
 
@@ -129,6 +129,28 @@ export function createBot() {
         .setTimestamp();
       await interaction.reply({ embeds: [embed] });
     }
+
+        // --- เพิ่มคำสั่ง ai-embed ตรงนี้ ---
+    if (interaction.commandName === "ai-embed") {
+      const prompt = interaction.options.getString("prompt");
+      await interaction.deferReply();
+
+      try {
+        const data = await getAIEmbedResponse(prompt);
+        const embed = new EmbedBuilder()
+          .setTitle(data.title || "AI Generated")
+          .setDescription(data.description || "No description")
+          .setColor(data.color || "#00ff88")
+          .setFooter({ text: data.footer || "" })
+          .setTimestamp();
+
+        await interaction.editReply({ embeds: [embed] });
+      } catch (err) {
+        console.error(err);
+        await interaction.editReply("❌ AI สร้าง Embed ไม่สำเร็จ (ลองเปลี่ยน Provider หรือใช้ภาษาอังกฤษสั้นๆ ดูนะคะ)");
+      }
+                                                }
+    
   });
 
   return client;
