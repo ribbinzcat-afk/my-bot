@@ -3,7 +3,7 @@ import { fileURLToPath } from "url";
 import { dirname, join } from "path";
 import fs from "fs";
 
-const __dirname = dirname(fileURLTfileURLToPathToPath(import.meta.url));
+const __dirname = dirname(fileURLTfileURLToPath(import.meta.url));
 
 // --- ปรับปรุงส่วนการเลือก Path ของ Database ---
 let dbPath;
