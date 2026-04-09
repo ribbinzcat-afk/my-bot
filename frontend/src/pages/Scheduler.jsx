@@ -14,6 +14,8 @@ export default function Scheduler() {
     color: "#5865F2",
     is_recurring: false,
     cron_expression: "",
+    recurring_type: "daily",
+    recurring_time: "09:00",
     scheduled_at: "",
     footer: "",
     thumbnail: "",
@@ -220,46 +222,56 @@ export default function Scheduler() {
               </button>
             </div>
 
-            {/* Schedule Type */}
-            <div className="form-group">
-              <label>
-                <input
-                  type="checkbox"
-                  checked={form.is_recurring}
-                  onChange={(e) => setForm({ ...form, is_recurring: e.target.checked })}
-                  style={{ marginRight: "0.5rem" }}
-                />
-                Recurring (ทำซ้ำ)
-              </label>
-            </div>
+{/* Schedule Type */}
+<div className="form-group" style={{ background: "#18181b", padding: "1rem", borderRadius: "8px", border: "1px solid #27272a" }}>
+  <label style={{ display: "flex", alignItems: "center", cursor: "pointer", marginBottom: form.is_recurring ? "1rem" : "0" }}>
+    <input
+      type="checkbox"
+      checked={form.is_recurring}
+      onChange={(e) => setForm({ ...form, is_recurring: e.target.checked })}
+      style={{ marginRight: "0.75rem", width: "18px", height: "18px" }}
+    />
+    <span style={{ fontWeight: 500 }}>ตั้งเวลาแบบทำซ้ำ (Recurring)</span>
+  </label>
 
-            {form.is_recurring ? (
-              <div className="form-group">
-                <label>Cron Expression</label>
-                <input
-                  type="text"
-                  value={form.cron_expression}
-                  onChange={(e) => setForm({ ...form, cron_expression: e.target.value })}
-                  placeholder="0 9 * * * (ทุกวัน 9:00)"
-                  required
-                />
-                <small style={{ color: "#71717a", fontSize: "0.75rem" }}>
-                  Format: minute hour day month weekday | เช่น "0 9 * * 1-5" = วันจันทร์-ศุกร์ 9:00
-                </small>
-              </div>
-            ) : (
-              <div className="form-group">
-                <label>Send At (เวลาที่ต้องการส่ง)</label>
-                <input
-                  type="datetime-local"
-                  value={form.scheduled_at}
-                  onChange={(e) =>
-                    setForm({ ...form, scheduled_at: new Date(e.target.value).toISOString() })
-                  }
-                  required
-                />
-              </div>
-            )}
+  {form.is_recurring ? (
+    <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "1rem", marginTop: "0.5rem" }}>
+      <div>
+        <label style={{ fontSize: "0.8rem", color: "#a1a1aa" }}>ทำซ้ำทุกๆ</label>
+        <select
+          value={form.recurring_type}
+          onChange={(e) => setForm({ ...form, recurring_type: e.target.value })}
+          style={{ marginTop: "0.25rem" }}
+        >
+          <option value="daily">ทุกวัน (Daily)</option>
+          <option value="weekly">ทุกสัปดาห์ (Weekly - วันจันทร์)</option>
+        </select>
+      </div>
+      <div>
+        <label style={{ fontSize: "0.8rem", color: "#a1a1aa" }}>ในเวลา</label>
+        <input
+          type="time"
+          value={form.recurring_time}
+          onChange={(e) => setForm({ ...form, recurring_time: e.target.value })}
+          style={{ marginTop: "0.25rem" }}
+        />
+      </div>
+      <div style={{ gridColumn: "span 2" }}>
+        <code style={{ fontSize: "0.7rem", color: "#5865F2" }}>Cron Output: {form.cron_expression}</code>
+      </div>
+    </div>
+  ) : (
+    <div className="form-group" style={{ marginTop: "1rem" }}>
+      <label style={{ fontSize: "0.8rem", color: "#a1a1aa" }}>วันที่และเวลาที่ต้องการส่ง</label>
+      <input
+        type="datetime-local"
+        value={form.scheduled_at ? new Date(form.scheduled_at).toISOString().slice(0, 16) : ""}
+        onChange={(e) => setForm({ ...form, scheduled_at: new Date(e.target.value).toISOString() })}
+        required
+      />
+    </div>
+  )}
+</div>
 
             <button className="btn btn-primary" type="submit">📅 Create Schedule</button>
 
