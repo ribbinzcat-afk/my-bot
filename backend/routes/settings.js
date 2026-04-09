@@ -72,4 +72,46 @@ router.put("/settings/:key", (req, res) => {
   res.json({ success: true });
 });
 
+// เพิ่มส่วนนี้ลงไปเพื่อรองรับปุ่ม Test
+router.post("/api-keys/test", async (req, res) => {
+  const { provider, api_key, model, base_url } = req.body;
+
+  if (!api_key) {
+    return res.status(400).json({ error: "ต้องระบุ API Key เพื่อทดสอบ" });
+  }
+
+  try {
+    // เลือก URL ที่จะยิงไปทดสอบ (ถ้ามี base_url ให้ใช้ตัวนั้น ถ้าไม่มีให้ใช้ของ OpenAI เป็นค่าเริ่มต้น)
+    const targetUrl = base_url || "https://api.openai.com/v1/chat/completions";
+
+    // จำลองการยิงทดสอบไปยัง AI Provider (ยิงแค่สั้นๆ เพื่อเช็คสิทธิ์)
+    const response = await fetch(targetUrl, {
+      method: "POST",
+      headers: {
+        "Authorization": `Bearer ${api_key}`,
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        model: model || "gpt-3.5-turbo", // หรือโมเดลพื้นฐานอื่นๆ
+        messages: [{ role: "user", content: "say hi" }],
+        max_tokens: 5,
+      }),
+    });
+
+    const data = await response.json();
+
+    if (response.ok) {
+      res.json({ success: true, message: `✅ เชื่อมต่อ ${provider} สำเร็จ!` });
+    } else {
+      // ถ้า API ตอบกลับมาว่า Error (เช่น Key ผิด)
+      res.status(response.status).json({ 
+        error: data.error?.message || "เชื่อมต่อไม่สำเร็จ กรุณาตรวจสอบ Key หรือ URL" 
+      });
+    }
+  } catch (err) {
+    // ถ้าเซิร์ฟเวอร์ยิงไปหา URL ไม่ได้เลย (เช่น URL ผิด หรือไม่มีเน็ต)
+    res.status(500).json({ error: "ไม่สามารถเชื่อมต่อกับ Provider ได้: " + err.message });
+  }
+});
+
 export default router;
