@@ -39,6 +39,7 @@ async function callOpenAI(messages, config) {
   const client = new OpenAI({ apiKey: config.api_key });
   const response = await client.chat.completions.create({
     model: config.model || "gpt-4o-mini",
+    baseURL: config.base_url || undefined,
     messages,
     max_tokens: 2048,
   });
