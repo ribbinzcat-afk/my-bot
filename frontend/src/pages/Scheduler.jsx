@@ -17,6 +17,8 @@ export default function Scheduler() {
     recurring_type: "daily",
     recurring_time: "09:00",
     scheduled_at: "",
+    once_date: new Date().toISOString().split('T')[0], // ค่าเริ่มต้นเป็นวันนี้
+    once_time: "12:00",
     footer: "",
     thumbnail: "",
     image: "",
@@ -29,6 +31,14 @@ export default function Scheduler() {
   };
 
   useEffect(load, []);
+
+  // สำหรับ One-time: รวมวันที่และเวลาเข้าด้วยกัน
+  useEffect(() => {
+    if (!form.is_recurring) {
+      const combinedDate = new Date(`${form.once_date}T${form.once_time}`);
+      setForm(prev => ({ ...prev, scheduled_at: combinedDate.toISOString() }));
+    }
+  }, [form.once_date, form.once_time, form.is_recurring]);
 
   const selectedGuild = guilds.find((g) => g.id === form.guild_id);
 
@@ -222,55 +232,77 @@ export default function Scheduler() {
               </button>
             </div>
 
-{/* Schedule Type */}
+{/* Schedule Type Group */}
 <div className="form-group" style={{ background: "#18181b", padding: "1rem", borderRadius: "8px", border: "1px solid #27272a" }}>
-  <label style={{ display: "flex", alignItems: "center", cursor: "pointer", marginBottom: form.is_recurring ? "1rem" : "0" }}>
+  <label style={{ display: "flex", alignItems: "center", cursor: "pointer", marginBottom: "1rem" }}>
     <input
       type="checkbox"
       checked={form.is_recurring}
       onChange={(e) => setForm({ ...form, is_recurring: e.target.checked })}
       style={{ marginRight: "0.75rem", width: "18px", height: "18px" }}
     />
-    <span style={{ fontWeight: 500 }}>ตั้งเวลาแบบทำซ้ำ (Recurring)</span>
+    <span style={{ fontWeight: 600 }}>ตั้งเวลาแบบทำซ้ำ (Recurring)</span>
   </label>
 
-  {form.is_recurring ? (
-    <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "1rem", marginTop: "0.5rem" }}>
-      <div>
-        <label style={{ fontSize: "0.8rem", color: "#a1a1aa" }}>ทำซ้ำทุกๆ</label>
-        <select
-          value={form.recurring_type}
-          onChange={(e) => setForm({ ...form, recurring_type: e.target.value })}
-          style={{ marginTop: "0.25rem" }}
-        >
-          <option value="daily">ทุกวัน (Daily)</option>
-          <option value="weekly">ทุกสัปดาห์ (Weekly - วันจันทร์)</option>
-        </select>
-      </div>
-      <div>
-        <label style={{ fontSize: "0.8rem", color: "#a1a1aa" }}>ในเวลา</label>
-        <input
-          type="time"
-          value={form.recurring_time}
-          onChange={(e) => setForm({ ...form, recurring_time: e.target.value })}
-          style={{ marginTop: "0.25rem" }}
-        />
-      </div>
-      <div style={{ gridColumn: "span 2" }}>
-        <code style={{ fontSize: "0.7rem", color: "#5865F2" }}>Cron Output: {form.cron_expression}</code>
-      </div>
-    </div>
-  ) : (
-    <div className="form-group" style={{ marginTop: "1rem" }}>
-      <label style={{ fontSize: "0.8rem", color: "#a1a1aa" }}>วันที่และเวลาที่ต้องการส่ง</label>
-      <input
-        type="datetime-local"
-        value={form.scheduled_at ? new Date(form.scheduled_at).toISOString().slice(0, 16) : ""}
-        onChange={(e) => setForm({ ...form, scheduled_at: new Date(e.target.value).toISOString() })}
-        required
-      />
-    </div>
-  )}
+  <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "1rem" }}>
+    {form.is_recurring ? (
+      // --- แบบทำซ้ำ (Recurring) ---
+      <>
+        <div>
+          <label style={{ fontSize: "0.8rem", color: "#a1a1aa" }}>ทำซ้ำทุกๆ</label>
+          <select
+            value={form.recurring_type}
+            onChange={(e) => setForm({ ...form, recurring_type: e.target.value })}
+          >
+            <option value="daily">ทุกวัน (Daily)</option>
+            <option value="weekly">ทุกสัปดาห์ (วันจันทร์)</option>
+          </select>
+        </div>
+        <div>
+          <label style={{ fontSize: "0.8rem", color: "#a1a1aa" }}>ในเวลา</label>
+          <input
+            type="time"
+            value={form.recurring_time}
+            onChange={(e) => setForm({ ...form, recurring_time: e.target.value })}
+          />
+        </div>
+      </>
+    ) : (
+      // --- แบบครั้งเดียว (One-time) เปลี่ยนเป็น Dropdown ---
+      <>
+        <div>
+          <label style={{ fontSize: "0.8rem", color: "#a1a1aa" }}>เลือกวันที่ส่ง</label>
+          <select
+            value={form.once_date}
+            onChange={(e) => setForm({ ...form, once_date: e.target.value })}
+          >
+            <option value={new Date().toISOString().split('T')[0]}>วันนี้</option>
+            <option value={new Date(Date.now() + 86400000).toISOString().split('T')[0]}>พรุ่งนี้</option>
+            {[...Array(5)].map((_, i) => {
+              const d = new Date(Date.now() + (i + 2) * 86400000);
+              const dateStr = d.toISOString().split('T')[0];
+              return <option key={dateStr} value={dateStr}>{d.toLocaleDateString('th-TH', { weekday: 'long', day: 'numeric', month: 'short' })}</option>
+            })}
+            {/* คุณสามารถเพิ่ม input date ปกติไว้เป็นทางเลือกสุดท้ายได้ถ้าต้องการ */}
+          </select>
+        </div>
+        <div>
+          <label style={{ fontSize: "0.8rem", color: "#a1a1aa" }}>เวลาที่ส่ง</label>
+          <input
+            type="time"
+            value={form.once_time}
+            onChange={(e) => setForm({ ...form, once_time: e.target.value })}
+          />
+        </div>
+      </>
+    )}
+  </div>
+  
+  <div style={{ marginTop: "0.75rem", textAlign: "right" }}>
+    <small style={{ color: "#5865F2", fontStyle: "italic" }}>
+      🔔 กำหนดส่ง: {form.is_recurring ? `Cron [${form.cron_expression}]` : new Date(form.scheduled_at).toLocaleString('th-TH')}
+    </small>
+  </div>
 </div>
 
             <button className="btn btn-primary" type="submit">📅 Create Schedule</button>
