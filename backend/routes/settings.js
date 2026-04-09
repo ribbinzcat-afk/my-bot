@@ -8,27 +8,34 @@ router.get("/api-keys", (req, res) => {
   const keys = db.prepare("SELECT * FROM api_keys").all();
   const masked = keys.map((k) => ({
     ...k,
+    // ยังคงซ่อน API Key ไว้เหมือนเดิม
     api_key: k.api_key.substring(0, 8) + "..." + k.api_key.slice(-4),
+    // base_url ส่งกลับไปตรงๆ ได้เลยเพื่อให้ Dashboard แสดงผลได้
+    base_url: k.base_url || "" 
   }));
   res.json(masked);
 });
 
 // Upsert API key
-router.post("/api-keys", (req, res) => {
-  const { provider, api_key, model } = req.body;
+  router.post("/api-keys", (req, res) => {
+  // 1. รับ base_url เพิ่มจาก req.body
+  const { provider, api_key, model, base_url } = req.body; 
+  
   if (!provider || !api_key) {
     return res.status(400).json({ error: "Provider and API key required" });
   }
 
+// 2. ปรับคำสั่ง SQL ให้ INSERT และ UPDATE ค่า base_url ด้วย
   db.prepare(
-    `INSERT INTO api_keys (provider, api_key, model) 
-     VALUES (?, ?, ?)
+    `INSERT INTO api_keys (provider, api_key, model, base_url) 
+     VALUES (?, ?, ?, ?)
      ON CONFLICT(provider) DO UPDATE SET 
        api_key = excluded.api_key, 
        model = excluded.model,
+       base_url = excluded.base_url, -- เพิ่มบรรทัดนี้
        updated_at = CURRENT_TIMESTAMP`
-  ).run(provider, api_key, model || "");
-
+  ).run(provider, api_key, model || "", base_url || ""); // ส่งค่า base_url เข้าไป
+    
   res.json({ success: true });
 });
 
