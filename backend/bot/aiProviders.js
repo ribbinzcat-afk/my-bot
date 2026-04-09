@@ -39,7 +39,25 @@ async function callOpenAI(messages, config) {
   const client = new OpenAI({ apiKey: config.api_key });
   const response = await client.chat.completions.create({
     model: config.model || "gpt-4o-mini",
-    baseURL: config.base_url || undefined,
+    messages,
+    max_tokens: 2048,
+  });
+  return response.choices[0].message.content;
+}
+
+async function callCustom(messages, config) {
+  // บังคับว่าต้องมี base_url ไม่งั้นไม่ทำงาน
+  if (!config.base_url) {
+    throw new Error("ค่าย Custom จำเป็นต้องระบุ Base URL ใน Dashboard");
+  }
+
+  const client = new OpenAI({ 
+    apiKey: config.api_key,
+    baseURL: config.base_url // ใช้ค่าจาก DB โดยตรง
+  });
+
+  const response = await client.chat.completions.create({
+    model: config.model || "gpt-4o-mini",
     messages,
     max_tokens: 2048,
   });
@@ -94,7 +112,7 @@ const providers = {
   openai: callOpenAI,
   anthropic: callAnthropic,
   gemini: callGemini,
-  custom: callOpenAI,
+  custom: callCustom,
 };
 
 // ─── Main Export ───
