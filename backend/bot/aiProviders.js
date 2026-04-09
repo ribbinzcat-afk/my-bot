@@ -61,7 +61,6 @@ async function callCustom(messages, config) {
   "Accept-Encoding": "gzip, deflate, br",
   "Connection": "keep-alive",
     }
-    }
   });
 
   const response = await client.chat.completions.create({
