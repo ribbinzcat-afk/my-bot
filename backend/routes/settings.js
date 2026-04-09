@@ -65,4 +65,60 @@ router.put("/settings/:key", (req, res) => {
   res.json({ success: true });
 });
 
+// Test API Key
+router.post("/api-keys/test", async (req, res) => {
+  const { provider, api_key, model, base_url } = req.body;
+
+  if (!api_key) {
+    return res.status(400).json({ error: "API key is required" });
+  }
+
+  try {
+    // 🛠️ Logic สำหรับจัดการ Base URL (สำหรับ Reverse Proxy)
+    // 1. ตัดช่องว่างออก
+    let finalBaseUrl = base_url?.trim(); 
+    
+    // 2. ถ้าไม่มีการระบุมา ให้ใช้ Default ของ OpenAI
+    if (!finalBaseUrl) {
+      finalBaseUrl = 'https://api.openai.com/v1';
+    }
+
+    // 3. ปรับแต่ง URL: ตัด / ตัวสุดท้ายออก (ถ้ามี) เพื่อไม่ให้ Path ซ้ำซ้อนตอนต่อ String
+    finalBaseUrl = finalBaseUrl.replace(/\/+$/, "");
+
+    // 🚀 เริ่มการทดสอบเชื่อมต่อ
+    // หมายเหตุ: ส่วนใหญ่ Reverse Proxy จะใช้โครงสร้างเดียวกับ OpenAI (/models หรือ /chat/completions)
+    const testEndpoint = `${finalBaseUrl}/models`;
+
+    console.log(`Testing connection to: ${testEndpoint}`); // ดูใน Render Log ว่ายิงไปถูกที่ไหม
+
+    const response = await fetch(testEndpoint, {
+      method: 'GET',
+      headers: { 
+        'Authorization': `Bearer ${api_key}`,
+        'Content-Type': 'application/json'
+      }
+    });
+
+    if (!response.ok) {
+      const errorData = await response.json().catch(() => ({}));
+      throw new Error(errorData.error?.message || `Proxy Error: ${response.status} ${response.statusText}`);
+    }
+
+    const data = await response.json();
+    
+    res.json({ 
+      success: true, 
+      message: `Successfully connected to ${provider} via Proxy!`,
+      details: `Found ${data.data?.length || 0} models available.` 
+    });
+
+  } catch (error) {
+    console.error("Test API Error:", error.message);
+    res.status(500).json({ 
+      error: error.message || "Failed to connect through reverse proxy" 
+    });
+  }
+});
+
 export default router;
