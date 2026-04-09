@@ -11,7 +11,7 @@ import Sidebar from "./components/Sidebar.jsx";
 
 // Axios defaults
 const API = axios.create({
-  baseURL: import.meta.env.VITE_API_URL || "/api",
+  baseURL: "https://discord-ai-bot-tvv7.onrender.com" || "/api",
 });
 
 API.interceptors.request.use((config) => {
