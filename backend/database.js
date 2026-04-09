@@ -24,7 +24,7 @@ if (process.env.RENDER) {
 const db = new Database(dbPath);
 // ------------------------------------------
 
-ragmapragma("journal_mode = WAL");
+db.pragma("journal_mode = WAL");
 
 export function initDatabase() {
   db.exec(`
