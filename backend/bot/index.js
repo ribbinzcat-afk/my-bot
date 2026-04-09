@@ -148,6 +148,13 @@ async function registerCommands() {
     new SlashCommandBuilder()
       .setName("status")
       .setDescription("Show bot status"),
+        new SlashCommandBuilder()
+      .setName("ai-embed")
+      .setDescription("ให้ AI ช่วยสร้าง Embed สวยๆ ให้")
+      .addStringOption((opt) =>
+        opt.setName("prompt")
+          .setDescription("บอกลักษณะ Embed ที่ต้องการ (เช่น ประกาศกฎกลุ่ม สีฟ้า)")
+          .setRequired(true),
   ].map((c) => c.toJSON());
 
   const rest = new REST({ version: "10" }).setToken(process.env.DISCORD_TOKEN);
