@@ -21,8 +21,8 @@ router.post("/login", async (req, res) => {
   }
 
   if (
-    username === "admin" &&
-    password === "gam31tara10aum2543"
+    username === process.env.ADMIN_USERNAME &&
+    password === process.env.ADMIN_PASSWORD
   ) {
     const token = jwt.sign({ username, role: "admin" }, process.env.JWT_SECRET, {
       expiresIn: "7d",
