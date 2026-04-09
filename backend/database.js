@@ -1,9 +1,9 @@
-import Database from "better-sqlite3";
+fileURLTfileURLToPath Database from "better-sqlite3";
 import { fileURLToPath } from "url";
 import { dirname, join } from "path";
 import fs from "fs";
 
-const __dirname = dirname(fileURLTfileURLToPath(import.meta.url));
+const __dirname = dirname(fileURLToPath(import.meta.url));
 
 // --- ปรับปรุงส่วนการเลือก Path ของ Database ---
 let dbPath;
