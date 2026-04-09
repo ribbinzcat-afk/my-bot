@@ -12,6 +12,11 @@ export default function Dashboard() {
       API.get("/settings/settings").catch(() => ({ data: {} })),
       API.get("/schedules").catch(() => ({ data: [] })),
     ]).then(([p, s, sc]) => {
+
+      console.log("Profile Data:", p.data);
+      console.log("Settings Data:", s.data);
+      console.log("Schedules Data:", sc.data); // <--- เช็กตัวนี้เป็นพิเศษ!
+      
       setProfile(p.data);
       setSettings(s.data);
       setSchedules(sc.data);
