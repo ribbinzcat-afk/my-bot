@@ -16,7 +16,7 @@ export default function Scheduler() {
     cron_expression: "",
     recurring_type: "daily",
     recurring_time: "09:00",
-    scheduled_at: "",
+    scheduled_at: new Date().toISOString(),
     once_date: new Date().toISOString().split('T')[0], // ค่าเริ่มต้นเป็นวันนี้
     once_time: "12:00",
     footer: "",
