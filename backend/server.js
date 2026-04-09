@@ -31,10 +31,12 @@ function authMiddleware(req, res, next) {
   }
 }
 
+// ย้าย
+app.use("/api/auth", authRoutes);
+
 app.use("/api", authMiddleware);
 
 // ─── Routes ───
-app.use("/api/auth", authRoutes);
 app.use("/api/settings", settingsRoutes);
 app.use("/api/profile", profileRoutes);
 app.use("/api/schedules", schedulesRoutes);
