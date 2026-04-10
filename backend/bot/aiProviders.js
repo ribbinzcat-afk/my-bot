@@ -162,7 +162,7 @@ export async function getAIResponse(
 Name: ${userInfo.displayName}
 Roles: ${userInfo.roles.join(", ")}
 Server: ${userInfo.guildName}
-Current Time: ${new Date().toLocaleString('th-TH')}
+Current Time: ${userInfo.currentTime}
 `;
   
   const history = getConversationHistory(channelId);
