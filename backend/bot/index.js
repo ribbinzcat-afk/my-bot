@@ -14,6 +14,63 @@ import db from "../database.js";
 
 let client;
 
+async function sendSplitMessage(target, content) {
+  const maxLength = 1800; // ตั้งค่าเพดานไว้ที่ 1800 ตามต้องการ
+  
+  if (content.length <= maxLength) {
+    if (target.editReply) return await target.editReply(content);
+    return await target.reply(content);
+  }
+
+  const chunks = [];
+  let currentText = content;
+
+  while (currentText.length > 0) {
+    if (currentText.length <= maxLength) {
+      chunks.push(currentText);
+      break;
+    }
+
+    // 1. พยายามตัดที่ 1800 ตัวอักษร
+    let splitIndex = maxLength;
+    let part = currentText.substring(0, maxLength);
+
+    // 2. หาจุดตัดที่เป็นการขึ้นบรรทัดใหม่ (\n) หรือ ช่องว่าง (Space) 
+    // โดยหาจากจุดที่ 1800 ย้อนกลับมา
+    const lastNewline = part.lastIndexOf("\n");
+    const lastSpace = part.lastIndexOf(" ");
+
+    if (lastNewline > maxLength * 0.7) { 
+      // ถ้าเจอขึ้นบรรทัดใหม่ในช่วง 30% ท้ายของก้อน ให้ตัดตรงนั้น
+      splitIndex = lastNewline;
+    } else if (lastSpace > maxLength * 0.7) {
+      // ถ้าไม่เจอขึ้นบรรทัดใหม่ แต่เจอช่องว่าง ให้ตัดตรงช่องว่าง
+      splitIndex = lastSpace;
+    }
+
+    // เก็บข้อความส่วนที่ตัดได้ลงใน chunks
+    chunks.push(currentText.substring(0, splitIndex).trim());
+    // ตัดส่วนที่ส่งแล้วออกจากตัวแปรหลักเพื่อวนลูปต่อ
+    currentText = currentText.substring(splitIndex).trim();
+  }
+
+  // --- ส่วนการส่งข้อความออกไปที่ Discord ---
+  for (let i = 0; i < chunks.length; i++) {
+    try {
+      if (i === 0) {
+        if (target.editReply) await target.editReply(chunks[i]);
+        else await target.reply(chunks[i]);
+      } else {
+        // ส่วนที่ 2 เป็นต้นไป ต้องใช้ followUp หรือ send
+        if (target.followUp) await target.followUp(chunks[i]);
+        else await target.channel.send(chunks[i]);
+      }
+    } catch (err) {
+      console.error("Error sending chunk:", err);
+    }
+  }
+}
+
 export function createBot() {
   client = new Client({
     intents: [
