@@ -136,7 +136,8 @@ export async function getAIResponse(
   guildId,
   channelId,
   userId,
-  userMessage
+  userMessage,
+  userInfo = {}
 ) {
   const activeProvider = getSetting("active_provider") || "openai";
   const config = getApiKey(activeProvider);
@@ -155,9 +156,18 @@ export async function getAIResponse(
 
   // Build messages array
   const systemPrompt = getSetting("system_prompt");
+
+  const userContext = `
+[User Context]
+Name: ${userInfo.displayName}
+Roles: ${userInfo.roles.join(", ")}
+Server: ${userInfo.guildName}
+Current Time: ${new Date().toLocaleString('th-TH')}
+`;
+  
   const history = getConversationHistory(channelId);
   const messages = [
-    { role: "system", content: systemPrompt },
+    { role: "system", content: systemPrompt + "\n" + userContext },
     ...history,
   ];
 
