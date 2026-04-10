@@ -145,11 +145,15 @@ await sendSplitMessage(interaction, reply);
       const prompt = interaction.options.getString("prompt");
       await interaction.deferReply();
 
-      const member = interaction.member;
+      const member = interaction.member || await interaction.guild.members.fetch(interaction.user.id);
       const userInfo = {
     displayName: member.displayName, // ชื่อเล่นในเซิร์ฟเวอร์
     roles: member.roles.cache.map(r => r.name).filter(n => n !== "@everyone"), // รายชื่อยศ
-    guildName: interaction.guild.name
+    guildName: interaction.guild.name,
+    currentTime: new Date().toLocaleString('th-TH', { 
+    timeZone: 'Asia/Bangkok',
+    dateStyle: 'full',
+    timeStyle: 'medium' })
   };
 
       const reply = await getAIResponse(
