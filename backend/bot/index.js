@@ -126,15 +126,7 @@ export function createBot() {
     );
 
     // Discord max 2000 chars — split if needed
-    if (reply.length <= 2000) {
-      await message.reply(reply);
-    } else {
-      const chunks = reply.match(/[\s\S]{1,2000}/g) || [];
-      for (let i = 0; i < chunks.length; i++) {
-        if (i === 0) await message.reply(chunks[i]);
-        else await message.channel.send(chunks[i]);
-      }
-    }
+await sendSplitMessage(interaction, reply);
   });
 
   // ─── Slash Commands ───
@@ -160,11 +152,7 @@ export function createBot() {
         prompt
       );
 
-      if (reply.length <= 2000) {
-        await interaction.editReply(reply);
-      } else {
-        await interaction.editReply(reply.substring(0, 2000));
-      }
+await sendSplitMessage(interaction, reply);
     }
 
     if (interaction.commandName === "status") {
