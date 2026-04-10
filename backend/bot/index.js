@@ -145,11 +145,19 @@ await sendSplitMessage(interaction, reply);
       const prompt = interaction.options.getString("prompt");
       await interaction.deferReply();
 
+      const member = interaction.member;
+      const userInfo = {
+    displayName: member.displayName, // ชื่อเล่นในเซิร์ฟเวอร์
+    roles: member.roles.cache.map(r => r.name).filter(n => n !== "@everyone"), // รายชื่อยศ
+    guildName: interaction.guild.name
+  };
+
       const reply = await getAIResponse(
         interaction.guildId || "DM",
         interaction.channelId,
         interaction.user.id,
-        prompt
+        prompt,
+        userInfo
       );
 
 await sendSplitMessage(interaction, reply);
