@@ -10,13 +10,6 @@ let dbPath;
 
 if (process.env.RENDER) {
   // เมื่อรันบน Render ให้ใช้ Disk ก้อนนอกที่ Mount ไว้ที่ /data
-  dbPath = "/data/bot.db";
-  
-  // ตรวจสอบเผื่อโฟลเดอร์ /data ยังไม่ถูกสร้าง (Render มักจะจัดการให้แต่เช็คไว้ชัวร์กว่า)
-  if (!fs.existsSync("/data")) {
-    fs.mkdirSync("/data", { recursive: true });
-  }
-} else {
   // เมื่อรันในเครื่องตัวเอง (Local) ให้เก็บไว้ในโฟลเดอร์เดิม (backend/bot.db)
   dbPath = join(__dirname, "bot.db");
 }
